@@ -1,0 +1,54 @@
+# 阶段3"可疑异常声段定位"工程参数。
+# 这些是初始工程参数, 未经临床验证, 不代表任何医学阈值——修改前请先理解
+# resp_agent/localization.py里classify_evidence_pattern附近的用法和注释。
+
+window_seconds: 2.0
+hop_seconds: 0.5
+time_resolution_seconds: 0.1
+masking_repeats: 3
+
+# focal/minimal判定用的绝对影响下限: 峰值(或曲线最大值)|signed_delta|低于
+# 这个值一律不算有意义的证据。
+minimal_absolute_effect: 0.02
+
+# focal判定: 峰值prominence(scipy.signal定义)必须>=全曲线最大绝对影响的
+# 这个比例。
+peak_prominence_ratio: 0.25
+
+# focal判定: 峰值绝对影响 / 全曲线绝对影响中位数 必须>=这个倍数。
+peak_to_median_ratio: 1.5
+
+# focal判定 + 整体稳定性判定共用: 局部(或全局)方向一致率下限, 低于此值
+# 视为该窗口/曲线整体"不稳定", 不下方向性结论。
+minimum_direction_consistency: 0.8
+
+# 最多输出几个可疑异常声段(按importance_score降序截断)。
+maximum_segments: 3
+
+# 整体不稳定判定: window级std均值 / (window级绝对值最大值+eps) 超过这个
+# 比例视为"分数方差过大"。
+max_relative_std: 0.5
+
+# 峰值位置稳定性判定(只在已经找到>=1个候选峰之后才检查, 不对diffuse曲线
+# 生效, 见localization.py::_peak_location_spread_seconds): 3个患者模型
+# 初始化各自找到的"全局绝对值最大窗口"中心时间, 彼此相差超过这个秒数就
+# 判定该候选峰不稳定, 整体降级为unstable。
+max_peak_location_spread_seconds: 2.0
+
+# 滑窗生成: 音频末尾残余片段短于这个秒数就丢弃, 不生成一个过短的窗口。
+minimum_tail_window_seconds: 0.5
+
+# 背景噪声水平估计: 用这个帧长(秒)切帧算RMS, 取最安静的10%分位数当背景
+# 噪声幅度, 遮挡窗口时用同等幅度的噪声替换。
+background_frame_seconds: 0.05
+
+# scipy.signal.peak_widths的rel_height参数: 峰值声段边界取"峰值高度的这个
+# 比例"处的半高宽(0.5=半高宽), 再和"不跨越符号翻转点"的边界取交集。
+peak_width_rel_height: 0.5
+
+# focal候选峰的4项判据(absolute_effect/prominence/peak_to_median_ratio/
+# direction_consistency)里, 任意一项相对阈值的相对余量
+# (raw_value - threshold) / threshold 低于这个值就标记is_borderline=True。
+# 不影响focal/diffuse/minimal/unstable四类顶层判定, 只附加在已经判成focal
+# 的声段上。初始工程参数(0.2=20%), 未经临床验证。
+borderline_relative_margin: 0.2

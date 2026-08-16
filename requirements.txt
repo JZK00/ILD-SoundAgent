@@ -1,0 +1,4 @@
+# 复用D:\conda_envs\resp环境里已有的torch/numpy/pandas/scikit-learn/librosa/
+# soundfile, 这里只列该环境里当前缺、Phase 2+(Gradio界面)会需要的包。
+# Phase 1(本阶段)不需要新增任何依赖, 全部用的是环境里已经验证过的库。
+gradio>=4.0
